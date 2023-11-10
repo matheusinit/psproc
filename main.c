@@ -4,6 +4,20 @@
 #include <stdlib.h>
 #include <string.h>
 
+int has_letters_in_string(char *string) {
+  int has_letters = 0;
+
+  for (char i = 0; i < strlen(string); i++) {
+
+    if (isalpha(string[i]) && !isdigit(string[i])) {
+      has_letters = 1;
+      break;
+    }
+  }
+
+  return has_letters;
+}
+
 int main() {
   DIR *dir;
   struct dirent *files;
@@ -27,14 +41,7 @@ int main() {
       continue;
     }
 
-    int has_letters = 0;
-    for (char i = 0; i < strlen(directory_name); i++) {
-
-      if (isalpha(directory_name[i]) && !isdigit(directory_name[i])) {
-        has_letters = 1;
-        break;
-      }
-    }
+    int has_letters = has_letters_in_string(directory_name);
 
     if (has_letters == 1) {
       continue;
