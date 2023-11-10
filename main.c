@@ -21,7 +21,8 @@ int has_letters_in_string(char *string) {
 int main() {
   DIR *dir;
   struct dirent *files;
-  int *list;
+  char *list[1000];
+  int list_index = 0;
 
   dir = opendir("/proc");
 
@@ -47,7 +48,17 @@ int main() {
       continue;
     }
 
-    printf("%s\n", directory_name);
+    list[list_index] = directory_name;
+    list_index++;
+  }
+
+  int list_size = sizeof(list);
+  for (int i = 0; i < list_size; i++) {
+    if (list[i] == NULL) {
+      break;
+    }
+
+    printf("%s\n", list[i]);
   }
 
   return EXIT_SUCCESS;
