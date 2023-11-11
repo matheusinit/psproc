@@ -29,20 +29,13 @@ int has_letters_in_string(char *string) {
   return has_letters;
 }
 
-int main() {
-  DIR *dir;
+char **get_processes_ids(DIR *directory) {
   struct dirent *files;
-  char *list[1000];
-  int list_index = 0;
+  int required_size = 1000;
+  char **array = malloc(sizeof(char *) * required_size);
+  int array_index = 0;
 
-  dir = opendir("/proc");
-
-  if (dir == NULL) {
-    printf("Error opening directory\n");
-    exit(1);
-  }
-
-  while ((files = readdir(dir))) {
+  while ((files = readdir(directory))) {
     char *directory_name = files->d_name;
 
     if (strcmp(directory_name, ".") == 0) {
@@ -59,13 +52,30 @@ int main() {
       continue;
     }
 
-    list[list_index] = directory_name;
-    list_index++;
+    array[array_index] = directory_name;
+    array_index++;
   }
 
-  int array_size = sizeof(list);
+  return array;
+}
 
-  print_directory_children_from_array(list, array_size);
+int main() {
+  DIR *dir;
+  struct dirent *files;
+  int array_size = 1000;
+  char **array = malloc(sizeof(char *) * array_size);
+  int array_index = 0;
+
+  dir = opendir("/proc");
+
+  if (dir == NULL) {
+    printf("Error opening directory\n");
+    exit(1);
+  }
+
+  array = get_processes_ids(dir);
+
+  print_directory_children_from_array(array, array_size);
 
   return EXIT_SUCCESS;
 }
