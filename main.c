@@ -1,8 +1,19 @@
 #include <ctype.h>
 #include <dirent.h>
+#include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+void print_directory_children_from_array(char **array, int array_size) {
+  for (int i = 0; i < array_size; i++) {
+    if (array[i] == NULL) {
+      break;
+    }
+
+    printf("%s\n", array[i]);
+  }
+}
 
 int has_letters_in_string(char *string) {
   int has_letters = 0;
@@ -52,14 +63,9 @@ int main() {
     list_index++;
   }
 
-  int list_size = sizeof(list);
-  for (int i = 0; i < list_size; i++) {
-    if (list[i] == NULL) {
-      break;
-    }
+  int array_size = sizeof(list);
 
-    printf("%s\n", list[i]);
-  }
+  print_directory_children_from_array(list, array_size);
 
   return EXIT_SUCCESS;
 }
