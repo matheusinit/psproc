@@ -60,20 +60,20 @@ char **get_processes_ids(DIR *directory) {
 }
 
 int main() {
-  DIR *dir;
+  DIR *proc_dir;
   struct dirent *files;
   int array_size = 1000;
   char **array = malloc(sizeof(char *) * array_size);
   int array_index = 0;
 
-  dir = opendir("/proc");
+  proc_dir = opendir("/proc");
 
-  if (dir == NULL) {
+  if (proc_dir == NULL) {
     printf("Error opening directory\n");
     exit(1);
   }
 
-  array = get_processes_ids(dir);
+  array = get_processes_ids(proc_dir);
 
   print_directory_children_from_array(array, array_size);
 
