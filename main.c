@@ -29,7 +29,7 @@ int has_letters_in_string(char *string) {
   return has_letters;
 }
 
-char **get_processes_ids(DIR *directory) {
+char **get_processes_ids(DIR *directory, int *array_size) {
   struct dirent *files;
   int required_size = 1000;
   char **array = malloc(sizeof(char *) * required_size);
@@ -54,6 +54,7 @@ char **get_processes_ids(DIR *directory) {
 
     array[array_index] = directory_name;
     array_index++;
+    (*array_size)++;
   }
 
   return array;
@@ -62,8 +63,9 @@ char **get_processes_ids(DIR *directory) {
 int main() {
   DIR *proc_dir;
   struct dirent *files;
-  int array_size = 1000;
-  char **array = malloc(sizeof(char *) * array_size);
+  int array_capacity = 1000;
+  int array_size = 0;
+  char **array = malloc(sizeof(char *) * array_capacity);
   int array_index = 0;
 
   proc_dir = opendir("/proc");
@@ -73,7 +75,7 @@ int main() {
     exit(1);
   }
 
-  array = get_processes_ids(proc_dir);
+  array = get_processes_ids(proc_dir, &array_size);
 
   print_directory_children_from_array(array, array_size);
 
