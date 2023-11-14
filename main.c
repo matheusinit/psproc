@@ -5,6 +5,19 @@
 #include <stdlib.h>
 #include <string.h>
 
+char *get_path_for_process(char *process_id) {
+  char *processes_folder = "/proc/";
+
+  size_t pid_path_length = strlen(processes_folder) + strlen(process_id);
+
+  char *pid_path = malloc(pid_path_length);
+
+  strcpy(pid_path, processes_folder);
+  strcat(pid_path, process_id);
+
+  return pid_path;
+}
+
 void print_directory_children_from_array(char **array, int array_size) {
   for (int i = 0; i < array_size; i++) {
     if (array[i] == NULL) {
@@ -78,14 +91,9 @@ int main() {
   array = get_processes_ids(proc_dir, &array_size);
 
   char *selected_pid = array[array_size - 1];
-  char *proc_folder = "/proc/";
+  char *pid_path = get_path_for_process(selected_pid);
 
-  size_t pid_path_length = strlen(proc_folder) + strlen(selected_pid);
-
-  char *pid_path = malloc(pid_path_length);
-
-  strcpy(pid_path, proc_folder);
-  strcat(pid_path, selected_pid);
+  printf("%s\n", pid_path);
 
   return EXIT_SUCCESS;
 }
