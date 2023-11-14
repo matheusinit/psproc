@@ -77,7 +77,15 @@ int main() {
 
   array = get_processes_ids(proc_dir, &array_size);
 
-  print_directory_children_from_array(array, array_size);
+  char *selected_pid = array[array_size - 1];
+  char *proc_folder = "/proc/";
+
+  size_t pid_path_length = strlen(proc_folder) + strlen(selected_pid);
+
+  char *pid_path = malloc(pid_path_length);
+
+  strcpy(pid_path, proc_folder);
+  strcat(pid_path, selected_pid);
 
   return EXIT_SUCCESS;
 }
