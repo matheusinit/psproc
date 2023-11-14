@@ -29,7 +29,7 @@ char *get_buffer_from_file(char *file_name, char *dir_path) {
   if (exe_file == NULL) {
     printf("Error opening file %s\n", file_name);
 
-    exit(1);
+    exit(EXIT_FAILURE);
   }
 
   while ((bytes_read = fread(buffer, 1, sizeof(buffer), exe_file)) > 0) {
@@ -127,7 +127,7 @@ int main() {
 
   if (proc_dir == NULL) {
     printf("Error opening directory\n");
-    exit(1);
+    exit(EXIT_FAILURE);
   }
 
   array = get_processes_ids(proc_dir, &array_size);
@@ -140,7 +140,7 @@ int main() {
 
   if (pid_dir == NULL) {
     printf("Error opening directory of process %s\n", selected_pid);
-    exit(1);
+    exit(EXIT_FAILURE);
   }
 
   while ((files = readdir(pid_dir))) {
