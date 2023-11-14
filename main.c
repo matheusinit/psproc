@@ -8,6 +8,45 @@
 #include <sys/mman.h>
 #include <unistd.h>
 
+char *get_buffer_from_file(char *file_name, char *dir_path) {
+  int file_content_buffer_capacity = sizeof(char) * 1024 * 10;
+  char *file_content = malloc(file_content_buffer_capacity);
+  int file_content_buffer_size = 0;
+
+  size_t stat_path_length = strlen(dir_path) + strlen(file_name) + 1;
+
+  char *pid_stat_path = malloc(stat_path_length);
+
+  strcpy(pid_stat_path, dir_path);
+  strcat(pid_stat_path, "/");
+  strcat(pid_stat_path, file_name);
+
+  FILE *exe_file = fopen(pid_stat_path, "r");
+
+  size_t bytes_read;
+  char *buffer = malloc(sizeof(char) * 1024);
+
+  if (exe_file == NULL) {
+    printf("Error opening file %s\n", file_name);
+
+    exit(1);
+  }
+
+  while ((bytes_read = fread(buffer, 1, sizeof(buffer), exe_file)) > 0) {
+    strcat(file_content, buffer);
+    file_content_buffer_size += bytes_read;
+
+    if (file_content_buffer_size >= file_content_buffer_capacity - 1) {
+      file_content_buffer_capacity *= 2;
+      file_content = realloc(file_content, file_content_buffer_capacity);
+    }
+  }
+
+  fclose(exe_file);
+
+  return file_content;
+}
+
 char *get_path_for_process(char *process_id) {
   char *processes_folder = "/proc/";
 
@@ -114,32 +153,9 @@ int main() {
     }
 
     if (strcmp(files->d_name, "stat") == 0) {
-      printf("%s\n", files->d_name);
+      char *file_content = get_buffer_from_file(files->d_name, pid_path);
 
-      size_t stat_path_length = strlen(pid_path) + strlen(files->d_name) + 1;
-
-      char *pid_stat_path = malloc(stat_path_length);
-
-      strcpy(pid_stat_path, pid_path);
-      strcat(pid_stat_path, "/");
-      strcat(pid_stat_path, files->d_name);
-
-      FILE *exe_file = fopen(pid_stat_path, "r");
-
-      size_t bytes_read;
-      char buffer[1024];
-
-      if (exe_file == NULL) {
-        printf("Error opening file %s\n", files->d_name);
-
-        exit(1);
-      }
-
-      while ((bytes_read = fread(buffer, 1, sizeof(buffer), exe_file)) > 0) {
-        fwrite(buffer, 1, bytes_read, stdout);
-      }
-
-      fclose(exe_file);
+      printf("%s", file_content);
     }
   }
 
