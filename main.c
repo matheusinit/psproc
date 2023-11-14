@@ -1,9 +1,12 @@
 #include <ctype.h>
 #include <dirent.h>
+#include <fcntl.h>
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/mman.h>
+#include <unistd.h>
 
 char *get_path_for_process(char *process_id) {
   char *processes_folder = "/proc/";
@@ -93,7 +96,52 @@ int main() {
   char *selected_pid = array[array_size - 1];
   char *pid_path = get_path_for_process(selected_pid);
 
+  DIR *pid_dir = opendir(pid_path);
   printf("%s\n", pid_path);
+
+  if (pid_dir == NULL) {
+    printf("Error opening directory of process %s\n", selected_pid);
+    exit(1);
+  }
+
+  while ((files = readdir(pid_dir))) {
+    if (strcmp(files->d_name, ".") == 0) {
+      continue;
+    }
+
+    if (strcmp(files->d_name, "..") == 0) {
+      continue;
+    }
+
+    if (strcmp(files->d_name, "stat") == 0) {
+      printf("%s\n", files->d_name);
+
+      size_t stat_path_length = strlen(pid_path) + strlen(files->d_name) + 1;
+
+      char *pid_stat_path = malloc(stat_path_length);
+
+      strcpy(pid_stat_path, pid_path);
+      strcat(pid_stat_path, "/");
+      strcat(pid_stat_path, files->d_name);
+
+      FILE *exe_file = fopen(pid_stat_path, "r");
+
+      size_t bytes_read;
+      char buffer[1024];
+
+      if (exe_file == NULL) {
+        printf("Error opening file %s\n", files->d_name);
+
+        exit(1);
+      }
+
+      while ((bytes_read = fread(buffer, 1, sizeof(buffer), exe_file)) > 0) {
+        fwrite(buffer, 1, bytes_read, stdout);
+      }
+
+      fclose(exe_file);
+    }
+  }
 
   return EXIT_SUCCESS;
 }
