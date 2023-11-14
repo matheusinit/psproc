@@ -8,6 +8,30 @@
 #include <sys/mman.h>
 #include <unistd.h>
 
+char **split_string_by_delimiter(char *string, char *delimiter) {
+  int size = 0;
+  int size_by_bytes = 0;
+  int capacity = sizeof(char) * 1024;
+  char **array = malloc(capacity);
+
+  char *token = strtok(string, " ");
+
+  while (token != NULL) {
+    array[size] = token;
+    size++;
+    size_by_bytes += strlen(token) + 1;
+
+    if (size_by_bytes >= capacity - 1) {
+      capacity *= 2;
+      array = realloc(array, capacity);
+    }
+
+    token = strtok(NULL, " ");
+  }
+
+  return array;
+}
+
 char *get_buffer_from_file(char *file_name, char *dir_path) {
   int file_content_buffer_capacity = sizeof(char) * 1024 * 10;
   char *file_content = malloc(file_content_buffer_capacity);
@@ -136,7 +160,7 @@ int main() {
   char *pid_path = get_path_for_process(selected_pid);
 
   DIR *pid_dir = opendir(pid_path);
-  printf("%s\n", pid_path);
+  // printf("%s\n", pid_path);
 
   if (pid_dir == NULL) {
     printf("Error opening directory of process %s\n", selected_pid);
@@ -155,9 +179,11 @@ int main() {
     if (strcmp(files->d_name, "stat") == 0) {
       char *file_content = get_buffer_from_file(files->d_name, pid_path);
 
-      printf("%s", file_content);
+      char **file_content_array = split_string_by_delimiter(file_content, " ");
     }
   }
+
+  closedir(pid_dir);
 
   return EXIT_SUCCESS;
 }
