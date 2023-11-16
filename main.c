@@ -8,23 +8,17 @@
 #include <sys/mman.h>
 #include <unistd.h>
 
-char **split_string_by_delimiter(char *string, char *delimiter) {
-  int size = 0;
+char **split_string_by_delimiter(char *string, int *size, char *delimiter) {
   int size_by_bytes = 0;
-  int capacity = sizeof(char) * 1024;
+  int capacity = sizeof(char) * 64;
   char **array = malloc(capacity);
 
   char *token = strtok(string, " ");
 
   while (token != NULL) {
-    array[size] = token;
-    size++;
-    size_by_bytes += strlen(token) + 1;
-
-    if (size_by_bytes >= capacity - 1) {
-      capacity *= 2;
-      array = realloc(array, capacity);
-    }
+    array[*size] = token;
+    (*size)++;
+    size_by_bytes += strlen(token);
 
     token = strtok(NULL, " ");
   }
@@ -33,7 +27,7 @@ char **split_string_by_delimiter(char *string, char *delimiter) {
 }
 
 char *get_buffer_from_file(char *file_name, char *dir_path) {
-  int file_content_buffer_capacity = sizeof(char) * 1024 * 10;
+  int file_content_buffer_capacity = sizeof(char) * 16;
   char *file_content = malloc(file_content_buffer_capacity);
   int file_content_buffer_size = 0;
 
@@ -48,7 +42,8 @@ char *get_buffer_from_file(char *file_name, char *dir_path) {
   FILE *exe_file = fopen(pid_stat_path, "r");
 
   size_t bytes_read;
-  char *buffer = malloc(sizeof(char) * 1024);
+  int buffer_capacity = sizeof(char) * 16;
+  char *buffer = malloc(sizeof(char) * 16);
 
   if (exe_file == NULL) {
     printf("Error opening file %s\n", file_name);
@@ -56,11 +51,15 @@ char *get_buffer_from_file(char *file_name, char *dir_path) {
     exit(EXIT_FAILURE);
   }
 
-  while ((bytes_read = fread(buffer, 1, sizeof(buffer), exe_file)) > 0) {
+  while ((bytes_read = fread(buffer, 1, buffer_capacity, exe_file)) > 0) {
+    if (bytes_read < buffer_capacity) {
+      buffer[bytes_read] = '\0';
+    }
+
     strcat(file_content, buffer);
     file_content_buffer_size += bytes_read;
 
-    if (file_content_buffer_size >= file_content_buffer_capacity - 1) {
+    if (file_content_buffer_size >= file_content_buffer_capacity) {
       file_content_buffer_capacity *= 2;
       file_content = realloc(file_content, file_content_buffer_capacity);
     }
@@ -160,7 +159,6 @@ int main() {
   char *pid_path = get_path_for_process(selected_pid);
 
   DIR *pid_dir = opendir(pid_path);
-  // printf("%s\n", pid_path);
 
   if (pid_dir == NULL) {
     printf("Error opening directory of process %s\n", selected_pid);
@@ -179,7 +177,14 @@ int main() {
     if (strcmp(files->d_name, "stat") == 0) {
       char *file_content = get_buffer_from_file(files->d_name, pid_path);
 
-      char **file_content_array = split_string_by_delimiter(file_content, " ");
+      printf("%s", file_content);
+
+      char *s = file_content;
+
+      int file_content_array_size = 0;
+
+      char **file_content_array = split_string_by_delimiter(
+          file_content, &file_content_array_size, " ");
     }
   }
 
