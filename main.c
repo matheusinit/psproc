@@ -138,31 +138,31 @@ char **get_processes_ids(DIR *directory, int *array_size) {
   return array;
 }
 
+DIR *check_and_open_directory(char *path) {
+  DIR *directory = opendir(path);
+
+  if (directory == NULL) {
+    printf("Error opening directory\n");
+    exit(EXIT_FAILURE);
+  };
+
+  return directory;
+}
+
 int main() {
-  DIR *proc_dir;
   struct dirent *files;
   int array_capacity = 1000;
   int processes_id_size = 0;
   char **processes_id = malloc(sizeof(char *) * array_capacity);
 
-  proc_dir = opendir("/proc");
-
-  if (proc_dir == NULL) {
-    printf("Error opening directory\n");
-    exit(EXIT_FAILURE);
-  }
+  DIR *proc_dir = check_and_open_directory("/proc");
 
   processes_id = get_processes_ids(proc_dir, &processes_id_size);
 
   char *selected_pid = processes_id[processes_id_size - 1];
   char *pid_path = get_path_for_process(selected_pid);
 
-  DIR *pid_dir = opendir(pid_path);
-
-  if (pid_dir == NULL) {
-    printf("Error opening directory of process %s\n", selected_pid);
-    exit(EXIT_FAILURE);
-  }
+  DIR *pid_dir = check_and_open_directory(pid_path);
 
   char *pid, *state, *command;
 
