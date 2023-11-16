@@ -165,6 +165,8 @@ int main() {
     exit(EXIT_FAILURE);
   }
 
+  char *pid, *state, *command;
+
   while ((files = readdir(pid_dir))) {
     if (strcmp(files->d_name, ".") == 0) {
       continue;
@@ -177,18 +179,28 @@ int main() {
     if (strcmp(files->d_name, "stat") == 0) {
       char *file_content = get_buffer_from_file(files->d_name, pid_path);
 
-      printf("%s", file_content);
-
       char *s = file_content;
 
       int file_content_array_size = 0;
 
       char **file_content_array = split_string_by_delimiter(
           file_content, &file_content_array_size, " ");
+
+      pid = file_content_array[0];
+      state = file_content_array[2];
+    }
+
+    if (strcmp(files->d_name, "cmdline") == 0) {
+      char *file_content = get_buffer_from_file(files->d_name, pid_path);
+
+      command = file_content;
     }
   }
 
   closedir(pid_dir);
+
+  printf("%s\t%s\t%s\n", "PID", "STATE", "COMMAND");
+  printf("%s\t%s\t%s\n", pid, state, command);
 
   return EXIT_SUCCESS;
 }
