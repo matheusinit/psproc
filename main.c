@@ -142,9 +142,8 @@ int main() {
   DIR *proc_dir;
   struct dirent *files;
   int array_capacity = 1000;
-  int array_size = 0;
-  char **array = malloc(sizeof(char *) * array_capacity);
-  int array_index = 0;
+  int processes_id_size = 0;
+  char **processes_id = malloc(sizeof(char *) * array_capacity);
 
   proc_dir = opendir("/proc");
 
@@ -153,9 +152,9 @@ int main() {
     exit(EXIT_FAILURE);
   }
 
-  array = get_processes_ids(proc_dir, &array_size);
+  processes_id = get_processes_ids(proc_dir, &processes_id_size);
 
-  char *selected_pid = array[array_size - 1];
+  char *selected_pid = processes_id[processes_id_size - 1];
   char *pid_path = get_path_for_process(selected_pid);
 
   DIR *pid_dir = opendir(pid_path);
