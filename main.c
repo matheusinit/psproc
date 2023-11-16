@@ -10,7 +10,7 @@
 
 char **split_string_by_delimiter(char *string, int *size, char *delimiter) {
   int size_by_bytes = 0;
-  int capacity = sizeof(char) * 64;
+  int capacity = sizeof(char) * 1024;
   char **array = malloc(capacity);
 
   char *token = strtok(string, " ");
@@ -27,8 +27,9 @@ char **split_string_by_delimiter(char *string, int *size, char *delimiter) {
 }
 
 char *get_buffer_from_file(char *file_name, char *dir_path) {
-  int file_content_buffer_capacity = sizeof(char) * 16;
-  char *file_content = malloc(file_content_buffer_capacity);
+  int file_content_buffer_capacity = 16;
+  char *file_content = calloc(file_content_buffer_capacity, sizeof(char));
+
   int file_content_buffer_size = 0;
 
   size_t stat_path_length = strlen(dir_path) + strlen(file_name) + 1;
@@ -43,7 +44,7 @@ char *get_buffer_from_file(char *file_name, char *dir_path) {
 
   size_t bytes_read;
   int buffer_capacity = sizeof(char) * 16;
-  char *buffer = malloc(sizeof(char) * 16);
+  char *buffer = malloc(buffer_capacity);
 
   if (exe_file == NULL) {
     printf("Error opening file %s\n", file_name);
@@ -159,49 +160,60 @@ int main() {
 
   processes_id = get_processes_ids(proc_dir, &processes_id_size);
 
-  char *selected_pid = processes_id[processes_id_size - 1];
-  char *pid_path = get_path_for_process(selected_pid);
+  printf("%s\t%s\t%s\n", "PID", "STATE", "COMMAND");
 
-  DIR *pid_dir = check_and_open_directory(pid_path);
+  for (int index = 0; index < 5; index++) {
+    char *selected_pid = processes_id[index];
 
-  char *pid, *state, *command;
+    char *pid_path = get_path_for_process(selected_pid);
 
-  while ((files = readdir(pid_dir))) {
-    if (strcmp(files->d_name, ".") == 0) {
-      continue;
+    DIR *pid_dir = check_and_open_directory(pid_path);
+
+    char *pid, *state, *command;
+
+    while ((files = readdir(pid_dir))) {
+
+      char **file_content_array;
+
+      if (strcmp(files->d_name, ".") == 0) {
+        continue;
+      }
+
+      if (strcmp(files->d_name, "..") == 0) {
+        continue;
+      }
+
+      if (strcmp(files->d_name, "stat") == 0) {
+
+        int file_content_array_size = 0;
+        char *file_content = get_buffer_from_file(files->d_name, pid_path);
+
+        file_content_array = split_string_by_delimiter(
+            file_content, &file_content_array_size, " ");
+
+        pid = file_content_array[0];
+        state = file_content_array[2];
+      }
+
+      if (strcmp(files->d_name, "cmdline") == 0) {
+        char *file_content = get_buffer_from_file(files->d_name, pid_path);
+
+        command = file_content;
+
+        if (strcmp(command, "") == 0) {
+          command = file_content_array[1];
+        }
+      }
     }
 
-    if (strcmp(files->d_name, "..") == 0) {
-      continue;
-    }
+    free(pid_path);
+    closedir(pid_dir);
 
-    if (strcmp(files->d_name, "stat") == 0) {
-      char *file_content = get_buffer_from_file(files->d_name, pid_path);
-
-      char *s = file_content;
-
-      int file_content_array_size = 0;
-
-      char **file_content_array = split_string_by_delimiter(
-          file_content, &file_content_array_size, " ");
-
-      pid = file_content_array[0];
-      state = file_content_array[2];
-    }
-
-    if (strcmp(files->d_name, "cmdline") == 0) {
-      char *file_content = get_buffer_from_file(files->d_name, pid_path);
-
-      command = file_content;
-    }
+    printf("%s\t%s\t%s\n", pid, state, command);
   }
 
-  closedir(pid_dir);
-
+  free(processes_id);
   closedir(proc_dir);
-
-  printf("%s\t%s\t%s\n", "PID", "STATE", "COMMAND");
-  printf("%s\t%s\t%s\n", pid, state, command);
 
   return EXIT_SUCCESS;
 }
