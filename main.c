@@ -198,6 +198,8 @@ int main() {
 
   closedir(pid_dir);
 
+  closedir(proc_dir);
+
   printf("%s\t%s\t%s\n", "PID", "STATE", "COMMAND");
   printf("%s\t%s\t%s\n", pid, state, command);
 
