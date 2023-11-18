@@ -9,16 +9,16 @@
 #include <unistd.h>
 
 char **split_string_by_delimiter(char *string, int *size, char *delimiter) {
-  int size_by_bytes = 0;
-  int capacity = sizeof(char) * 1024;
-  char **array = malloc(capacity);
+  int capacity = 52;
+  char **array = calloc(capacity, sizeof(char *));
 
   char *token = strtok(string, " ");
 
   while (token != NULL) {
-    array[*size] = token;
+    int token_length = strlen(token);
+    array[*size] = malloc(token_length * sizeof(char));
+    strcpy(array[*size], token);
     (*size)++;
-    size_by_bytes += strlen(token);
 
     token = strtok(NULL, " ");
   }
