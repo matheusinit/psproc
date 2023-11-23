@@ -12,7 +12,7 @@ char **split_string_by_delimiter(char *string, int *size, char *delimiter) {
   int capacity = 52;
   char **array = calloc(capacity + 1, sizeof(char *));
 
-  char *token = strtok(string, " ");
+  char *token = strtok(string, delimiter);
 
   while (token != NULL) {
     int token_length = strlen(token);
