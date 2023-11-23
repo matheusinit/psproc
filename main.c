@@ -55,7 +55,7 @@ char *get_buffer_from_file(char *file_name, char *dir_path) {
   }
 
   while ((bytes_read = fread(buffer, 1, buffer_capacity, exe_file)) > 0) {
-    if (bytes_read < buffer_capacity) {
+    if (buffer_capacity >= 0 && bytes_read < (size_t)buffer_capacity) {
       buffer[bytes_read] = '\0';
     }
 
@@ -101,7 +101,7 @@ void print_directory_children_from_array(char **array, int array_size) {
 int has_letters_in_string(char *string) {
   int has_letters = 0;
 
-  for (int i = 0; i < strlen(string); i++) {
+  for (int i = 0; i >= 0 && (size_t)i < strlen(string); i++) {
 
     if (isalpha(string[i]) && !isdigit(string[i])) {
       has_letters = 1;
