@@ -13,3 +13,7 @@ compile:
 .PHONY: run
 run:
 	(cd $(BUILD_DIR) && ./proc)
+
+.PHONY: check
+check:
+	(cd $(BUILD_DIR) && valgrind --leak-check=full ./proc)
