@@ -10,13 +10,13 @@
 
 char **split_string_by_delimiter(char *string, int *size, char *delimiter) {
   int capacity = 52;
-  char **array = calloc(capacity, sizeof(char *));
+  char **array = calloc(capacity + 1, sizeof(char *));
 
   char *token = strtok(string, " ");
 
   while (token != NULL) {
     int token_length = strlen(token);
-    array[*size] = malloc(token_length * sizeof(char));
+    array[*size] = calloc(token_length + 1, sizeof(char));
     strcpy(array[*size], token);
     (*size)++;
 
@@ -28,13 +28,15 @@ char **split_string_by_delimiter(char *string, int *size, char *delimiter) {
 
 char *get_buffer_from_file(char *file_name, char *dir_path) {
   int file_content_buffer_capacity = 16;
-  char *file_content = calloc(file_content_buffer_capacity, sizeof(char));
+  char *file_content = calloc(file_content_buffer_capacity + 1, sizeof(char));
+  file_content[file_content_buffer_capacity] = '\0';
 
   int file_content_buffer_size = 0;
 
   size_t stat_path_length = strlen(dir_path) + strlen(file_name) + 1;
 
-  char *pid_stat_path = malloc(stat_path_length);
+  char *pid_stat_path = calloc(stat_path_length + 1, sizeof(char));
+  pid_stat_path[stat_path_length] = '\0';
 
   strcpy(pid_stat_path, dir_path);
   strcat(pid_stat_path, "/");
@@ -44,7 +46,7 @@ char *get_buffer_from_file(char *file_name, char *dir_path) {
 
   size_t bytes_read;
   int buffer_capacity = sizeof(char) * 16;
-  char *buffer = malloc(buffer_capacity);
+  char *buffer = calloc(buffer_capacity + 1, sizeof(char));
 
   if (exe_file == NULL) {
     printf("Error opening file %s\n", file_name);
@@ -62,9 +64,11 @@ char *get_buffer_from_file(char *file_name, char *dir_path) {
 
     if (file_content_buffer_size >= file_content_buffer_capacity) {
       file_content_buffer_capacity *= 2;
-      file_content = realloc(file_content, file_content_buffer_capacity);
+      file_content = realloc(file_content, file_content_buffer_capacity + 1);
     }
   }
+
+  free(buffer);
 
   fclose(exe_file);
 
@@ -76,7 +80,7 @@ char *get_path_for_process(char *process_id) {
 
   size_t pid_path_length = strlen(processes_folder) + strlen(process_id);
 
-  char *pid_path = malloc(pid_path_length);
+  char *pid_path = malloc(pid_path_length + 1);
 
   strcpy(pid_path, processes_folder);
   strcat(pid_path, process_id);
@@ -97,7 +101,7 @@ void print_directory_children_from_array(char **array, int array_size) {
 int has_letters_in_string(char *string) {
   int has_letters = 0;
 
-  for (char i = 0; i < strlen(string); i++) {
+  for (int i = 0; i < strlen(string); i++) {
 
     if (isalpha(string[i]) && !isdigit(string[i])) {
       has_letters = 1;
@@ -162,7 +166,7 @@ int main() {
 
   printf("%s\t%s\t%s\n", "PID", "STATE", "COMMAND");
 
-  for (int index = 0; index < 5; index++) {
+  for (int index = 0; index < processes_id_size; index++) {
     char *selected_pid = processes_id[index];
 
     char *pid_path = get_path_for_process(selected_pid);
