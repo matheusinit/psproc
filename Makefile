@@ -8,7 +8,7 @@ all: compile
 
 .PHONY: compile
 compile:
-	mkdir -p $(BUILD_DIR) && $(CC) $(CFLAGS) -o build/proc main.c
+	mkdir -p $(BUILD_DIR) && $(CC) $(CFLAGS) -o build/proc *.c
 
 .PHONY: run
 run:
