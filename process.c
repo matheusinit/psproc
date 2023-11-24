@@ -1,5 +1,6 @@
 #include "process.h"
 
+#include "utils.h"
 #include <ctype.h>
 #include <dirent.h>
 #include <stdlib.h>
@@ -17,8 +18,6 @@ char *get_path_for_process(char *process_id) {
 
   return pid_path;
 }
-
-int has_letters_in_string(char *string);
 
 char **get_processes_ids(DIR *directory, int *array_size) {
   struct dirent *files;
@@ -49,18 +48,4 @@ char **get_processes_ids(DIR *directory, int *array_size) {
   }
 
   return array;
-}
-
-int has_letters_in_string(char *string) {
-  int has_letters = 0;
-
-  for (int i = 0; i >= 0 && (size_t)i < strlen(string); i++) {
-
-    if (isalpha(string[i]) && !isdigit(string[i])) {
-      has_letters = 1;
-      break;
-    }
-  }
-
-  return has_letters;
 }
