@@ -95,17 +95,6 @@ char **get_processes_ids(DIR *directory, int *array_size) {
   return array;
 }
 
-DIR *check_and_open_directory(char *path) {
-  DIR *directory = opendir(path);
-
-  if (directory == NULL) {
-    printf("Error opening directory\n");
-    exit(EXIT_FAILURE);
-  };
-
-  return directory;
-}
-
 int main() {
   struct dirent *files;
   int array_capacity = 1000;

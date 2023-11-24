@@ -52,3 +52,14 @@ char *get_file_content(char *filename, char *dir_path) {
 
   return file_content;
 }
+
+DIR *check_and_open_directory(char *path) {
+  DIR *directory = opendir(path);
+
+  if (directory == NULL) {
+    printf("Error opening directory\n");
+    exit(EXIT_FAILURE);
+  };
+
+  return directory;
+}
