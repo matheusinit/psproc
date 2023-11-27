@@ -5,5 +5,6 @@
 
 char **get_processes_ids(DIR *directory, int *array_size);
 char *get_path_for_process(char *process_id);
+int calculate_cpu_usage(char *pid);
 
 #endif

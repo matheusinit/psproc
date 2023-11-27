@@ -18,8 +18,10 @@ int main() {
 
   printf("%s\t%s\t%s\n", "PID", "STATE", "COMMAND");
 
-  for (int index = 0; index < processes_id_size; index++) {
+  for (int index = 0; index < 1; index++) {
     char *selected_pid = processes_id[index];
+
+    int cpu_usage = calculate_cpu_usage(selected_pid);
 
     char *pid_path = get_path_for_process(selected_pid);
 
@@ -65,7 +67,7 @@ int main() {
     free(pid_path);
     closedir(pid_dir);
 
-    printf("%s\t%s\t%s\n", pid, state, command);
+    // printf("%s\t%s\t%s\n", pid, state, command);
   }
 
   free(processes_id);

@@ -1,10 +1,13 @@
 #include "process.h"
 
+#include "file.h"
 #include "utils.h"
 #include <ctype.h>
 #include <dirent.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 
 char *get_path_for_process(char *process_id) {
   char *processes_folder = "/proc/";
@@ -48,4 +51,50 @@ char **get_processes_ids(DIR *directory, int *array_size) {
   }
 
   return array;
+}
+
+int get_clock_ticks_by_pid(char *pid) {
+  char *pid_path = get_path_for_process(pid);
+  char *file = get_file_content("/stat", pid_path);
+  int size = 0;
+
+  char **array = split_string_by_delimiter(file, &size, " ");
+
+  int user_time = atoi(array[13]);
+  int system_time = atoi(array[14]);
+
+  int total_time = user_time + system_time;
+
+  free(pid_path);
+  free(file);
+  free(array);
+
+  return total_time;
+}
+
+int get_total_clock_ticks() {
+  char *file = get_file_content("stat", "/proc");
+
+  printf("%s\n", file);
+
+  int size = 0;
+  // char **array = split_string_by_delimiter(file, &size, " ");
+
+  return 0;
+}
+
+int calculate_cpu_usage(char *pid) {
+  int total_time_before = get_clock_ticks_by_pid(pid);
+
+  printf("%d\n", total_time_before);
+
+  sleep(1);
+
+  int total_time_after = get_clock_ticks_by_pid(pid);
+
+  printf("%d\n", total_time_after);
+
+  get_total_clock_ticks();
+
+  return 0;
 }
