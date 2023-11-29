@@ -2,13 +2,14 @@ CC = cc
 CFLAGS =-W -Wall
 CFLAGS +=-std=c99
 BUILD_DIR = ./build/
+SRC=./src/*.c
 
 .PHONY: all
 all: compile
 
 .PHONY: compile
 compile:
-	mkdir -p $(BUILD_DIR) && $(CC) $(CFLAGS) -o build/proc *.c
+	mkdir -p $(BUILD_DIR) && $(CC) $(CFLAGS) -o build/proc $(SRC)
 
 .PHONY: run
 run:
