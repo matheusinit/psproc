@@ -72,24 +72,31 @@ int get_clock_ticks_by_pid(char *pid) {
   return total_time;
 }
 
+char **separate_file_by_lines(char *file) {
+  int capacity2 = 1024 * 8;
+  int size = 0;
+  char **list = calloc(capacity2 + 1, sizeof(char *));
+
+  char *token = strtok(file, "\n");
+
+  while (token != NULL) {
+    int token_length = strlen(token);
+    list[size] = calloc(token_length + 1, sizeof(char));
+    strcpy(list[size], token);
+    size++;
+
+    token = strtok(NULL, "\n");
+  }
+
+  return list;
+}
+
 int get_total_clock_ticks() {
   char *file = get_file_content("stat", "/proc");
 
-  int capacity2 = 1024 * 8;
-  int file_separated_by_lines_size = 0;
-  char **file_separated_by_lines = calloc(capacity2 + 1, sizeof(char *));
+  char **file_separated_by_lines = separate_file_by_lines(file);
 
-  char *token2 = strtok(file, "\n");
-
-  while (token2 != NULL) {
-    int token_length = strlen(token2);
-    file_separated_by_lines[file_separated_by_lines_size] =
-        calloc(token_length + 1, sizeof(char));
-    strcpy(file_separated_by_lines[file_separated_by_lines_size], token2);
-    file_separated_by_lines_size++;
-
-    token2 = strtok(NULL, "\n");
-  }
+  printf("%s\n", file_separated_by_lines[1]);
 
   // int size = 0;
   //
