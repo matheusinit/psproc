@@ -58,7 +58,7 @@ int get_clock_ticks_by_pid(char *pid) {
   char *file = get_file_content("/stat", pid_path);
   int size = 0;
 
-  char **array = split_string_by_delimiter(file, &size, " ");
+  char **array = split_string_by_delimiter(file, &size, " ", 52);
 
   int user_time = atoi(array[13]);
   int system_time = atoi(array[14]);
@@ -96,44 +96,35 @@ int get_total_clock_ticks() {
 
   char **file_separated_by_lines = separate_file_by_lines(file);
 
-  printf("%s\n", file_separated_by_lines[1]);
+  char *cpu_ticks = file_separated_by_lines[0];
 
-  // int size = 0;
-  //
-  // int capacity = 1024;
-  // char **array = calloc(capacity + 1, sizeof(char *));
-  //
-  // char *token = strtok(file, " ");
-  //
-  // while (token != NULL) {
-  //   int token_length = strlen(token);
-  //   array[size] = calloc(token_length + 1, sizeof(char));
-  //   strcpy(array[size], token);
-  //   printf("Token: %s\n", token);
-  //   printf("Token in Array: %s\n", array[size]);
-  //
-  //   size++;
-  //   token = strtok(NULL, " ");
-  // }
+  int size = 0;
 
-  // printf("%s\n", token);
-  // char **array = split_string_by_delimiter(file, &size, " ");
+  char **array = split_string_by_delimiter(cpu_ticks, &size, " ", 52);
 
-  return 0;
+  int total_clock_ticks = 0;
+
+  for (int i = 1; i < size; i++) {
+    total_clock_ticks += atoi(array[i]);
+  }
+
+  return total_clock_ticks;
 }
 
 int calculate_cpu_usage(char *pid) {
   int total_time_before = get_clock_ticks_by_pid(pid);
 
-  printf("%d\n", total_time_before);
+  // printf("%d\n", total_time_before);
 
   sleep(1);
 
   int total_time_after = get_clock_ticks_by_pid(pid);
 
-  printf("%d\n", total_time_after);
+  // printf("%d\n", total_time_after);
 
-  get_total_clock_ticks();
+  int total_clock_ticks = get_total_clock_ticks();
+
+  printf("%d\n", total_clock_ticks);
 
   return 0;
 }

@@ -19,8 +19,8 @@ int has_letters_in_string(char *string) {
   return has_letters;
 }
 
-char **split_string_by_delimiter(char *string, int *size, char *delimiter) {
-  int capacity = 52;
+char **split_string_by_delimiter(char *string, int *size, char *delimiter,
+                                 int capacity) {
   char **array = calloc(capacity + 1, sizeof(char *));
 
   char *token = strtok(string, delimiter);

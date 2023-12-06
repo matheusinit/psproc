@@ -47,7 +47,7 @@ int main() {
         char *file_content = get_file_content(files->d_name, pid_path);
 
         file_content_array = split_string_by_delimiter(
-            file_content, &file_content_array_size, " ");
+            file_content, &file_content_array_size, " ", 52);
 
         pid = file_content_array[0];
         state = file_content_array[2];
