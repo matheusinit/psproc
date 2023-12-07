@@ -104,27 +104,27 @@ int get_total_clock_ticks() {
 
   int total_clock_ticks = 0;
 
-  for (int i = 1; i < size; i++) {
+  for (int i = 2; i < size - 5; i++) {
     total_clock_ticks += atoi(array[i]);
   }
 
   return total_clock_ticks;
 }
 
-int calculate_cpu_usage(char *pid) {
+float calculate_cpu_usage(char *pid) {
   int total_time_before = get_clock_ticks_by_pid(pid);
-
-  // printf("%d\n", total_time_before);
+  int total_clock_ticks_before = get_total_clock_ticks();
 
   sleep(1);
 
   int total_time_after = get_clock_ticks_by_pid(pid);
+  int total_clock_ticks_after = get_total_clock_ticks();
 
-  // printf("%d\n", total_time_after);
+  int pid_total_time = total_time_after - total_time_before;
+  int cpu_usage_in_second = total_clock_ticks_after - total_clock_ticks_before;
 
-  int total_clock_ticks = get_total_clock_ticks();
-
-  printf("%d\n", total_clock_ticks);
+  float cpu_usage = 4 * (total_time_after - total_time_before) * 100 /
+                    (float)(total_clock_ticks_after - total_clock_ticks_before);
 
   return 0;
 }
