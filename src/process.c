@@ -65,10 +65,6 @@ int get_clock_ticks_by_pid(char *pid) {
 
   int total_time = user_time + system_time;
 
-  free(pid_path);
-  free(file);
-  free(array);
-
   return total_time;
 }
 
@@ -111,20 +107,39 @@ int get_total_clock_ticks() {
   return total_clock_ticks;
 }
 
-float calculate_cpu_usage(char *pid) {
-  int total_time_before = get_clock_ticks_by_pid(pid);
-  int total_clock_ticks_before = get_total_clock_ticks();
+float *calculate_cpu_usage(char **pid_list, int size) {
+  int *total_time_before = calloc(size + 1, sizeof(int));
+  int *total_clock_ticks_before = calloc(size + 1, sizeof(int));
+  int *total_time_after = calloc(size + 1, sizeof(int));
+  int *total_clock_ticks_after = calloc(size + 1, sizeof(int));
+
+  for (int i = 0; i < size; i++) {
+    char *pid = pid_list[i];
+
+    total_time_before[i] = get_clock_ticks_by_pid(pid);
+    total_clock_ticks_before[i] = get_total_clock_ticks();
+  }
 
   sleep(1);
 
-  int total_time_after = get_clock_ticks_by_pid(pid);
-  int total_clock_ticks_after = get_total_clock_ticks();
+  for (int i = 0; i < size; i++) {
+    char *pid = pid_list[i];
 
-  int pid_total_time = total_time_after - total_time_before;
-  int cpu_usage_in_second = total_clock_ticks_after - total_clock_ticks_before;
+    total_time_after[i] = get_clock_ticks_by_pid(pid);
+    total_clock_ticks_after[i] = get_total_clock_ticks();
+  }
 
-  float cpu_usage = 4 * (total_time_after - total_time_before) * 100 /
-                    (float)(total_clock_ticks_after - total_clock_ticks_before);
+  float *cpu_usage_list = calloc(size, sizeof(int));
 
-  return 0;
+  for (int i = 0; i < size; i++) {
+    int pid_total_time = total_time_after[i] - total_time_before[i];
+    int cpu_usage_in_second =
+        total_clock_ticks_after[i] - total_clock_ticks_before[i];
+
+    float cpu_usage = 4 * pid_total_time * 100 / (float)(cpu_usage_in_second);
+
+    cpu_usage_list[i] = cpu_usage;
+  }
+
+  return cpu_usage_list;
 }
