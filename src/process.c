@@ -49,6 +49,7 @@ float *calculate_cpu_usage(char **pid_list, int size) {
   int *total_clock_ticks_before = calloc(size + 1, sizeof(int));
   int *total_time_after = calloc(size + 1, sizeof(int));
   int *total_clock_ticks_after = calloc(size + 1, sizeof(int));
+  float *cpu_usage_list = calloc(size, sizeof(int));
 
   for (int i = 0; i < size; i++) {
     char *pid = pid_list[i];
@@ -65,8 +66,6 @@ float *calculate_cpu_usage(char **pid_list, int size) {
     total_time_after[i] = get_clock_ticks_by_pid(pid);
     total_clock_ticks_after[i] = get_total_clock_ticks();
   }
-
-  float *cpu_usage_list = calloc(size, sizeof(int));
 
   for (int i = 0; i < size; i++) {
     int pid_total_time = total_time_after[i] - total_time_before[i];
