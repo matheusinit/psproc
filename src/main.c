@@ -43,9 +43,9 @@ int main() {
 
       if (strcmp(files->d_name, "stat") == 0) {
 
-        int file_content_array_size = 0;
         char *file_content = get_file_content(files->d_name, pid_path);
 
+        int file_content_array_size = 0;
         file_content_array = split_string_by_delimiter(
             file_content, &file_content_array_size, " ", 52);
 
