@@ -13,6 +13,78 @@ char **separate_file_by_lines(char *file);
 int get_clock_ticks_by_pid(char *pid);
 int get_total_clock_ticks();
 
+struct process *get_process_by_pid(char *pid) {
+  struct dirent *files;
+
+  struct process *current_process = malloc(sizeof(struct process));
+
+  current_process->cpu_usage = 0.0;
+  current_process->pid_path = malloc(256);
+  current_process->pid = malloc(100);
+  current_process->command = malloc(256);
+  current_process->state = malloc(3);
+
+  strcpy(current_process->pid_path, "NULL");
+  strcpy(current_process->pid, "NULL");
+  strcpy(current_process->command, "NULL");
+  strcpy(current_process->state, "NULL");
+
+  char *pid_path = get_path_for_process(pid);
+
+  current_process->pid_path = get_path_for_process(pid);
+
+  if (strcmp(current_process->pid_path, "NULL") == 0) {
+    return current_process;
+  }
+
+  DIR *pid_dir = check_and_open_directory(current_process->pid_path);
+
+  while ((files = readdir(pid_dir))) {
+    if (strcmp(files->d_name, ".") == 0) {
+      continue;
+    }
+
+    if (strcmp(files->d_name, "..") == 0) {
+      continue;
+    }
+
+    if (strcmp(files->d_name, "stat") == 0) {
+      char *file_content =
+          get_file_content(files->d_name, current_process->pid_path);
+
+      int file_content_array_size = 0;
+      char **file_content_array = split_string_by_delimiter(
+          file_content, &file_content_array_size, " ", 52);
+      current_process->pid = file_content_array[0];
+      current_process->state = file_content_array[2];
+    }
+
+    if (strcmp(files->d_name, "cmdline") == 0) {
+      char *file_content =
+          get_file_content(files->d_name, current_process->pid_path);
+
+      current_process->command = file_content;
+
+      if (strcmp(current_process->command, "") == 0) {
+
+        char *file_content =
+            get_file_content("stat", current_process->pid_path);
+
+        int file_content_array_size = 0;
+
+        char **file_content_array = split_string_by_delimiter(
+            file_content, &file_content_array_size, " ", 52);
+
+        current_process->command = file_content_array[1];
+      }
+    }
+  }
+
+  closedir(pid_dir);
+
+  return current_process;
+}
+
 char **get_processes_ids(DIR *directory, int *array_size) {
   struct dirent *files;
   int required_size = 1000;
