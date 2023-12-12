@@ -24,10 +24,10 @@ struct process *get_process_by_pid(char *pid) {
   current_process->command = malloc(256);
   current_process->state = malloc(3);
 
-  strcpy(current_process->pid_path, "NULL");
-  strcpy(current_process->pid, "NULL");
-  strcpy(current_process->command, "NULL");
-  strcpy(current_process->state, "NULL");
+  current_process->pid_path = "NULL";
+  current_process->pid = "NULL";
+  current_process->command = "NULL";
+  current_process->state = "NULL";
 
   char *pid_path = get_path_for_process(pid);
 
