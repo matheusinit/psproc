@@ -31,7 +31,7 @@ struct process *get_process_by_pid(char *pid) {
 
   char *pid_path = get_path_for_process(pid);
 
-  current_process->pid_path = get_path_for_process(pid);
+  current_process->pid_path = pid_path;
 
   if (strcmp(current_process->pid_path, "NULL") == 0) {
     return current_process;
