@@ -43,12 +43,6 @@ struct process *get_process_by_pid(char *pid) {
 
   struct process *current_process = malloc(sizeof(struct process));
 
-  current_process->cpu_usage = 0.0;
-  current_process->pid_path = malloc(256);
-  current_process->pid = malloc(100);
-  current_process->command = malloc(256);
-  current_process->state = malloc(3);
-
   current_process->pid_path = "NULL";
   current_process->pid = "NULL";
   current_process->command = "NULL";
@@ -82,6 +76,8 @@ struct process *get_process_by_pid(char *pid) {
           file_content, &file_content_array_size, " ", 52);
       current_process->pid = file_content_array[0];
       current_process->state = file_content_array[2];
+      free(file_content_array);
+      free(file_content);
     }
 
     if (strcmp(files->d_name, "cmdline") == 0) {
@@ -101,9 +97,15 @@ struct process *get_process_by_pid(char *pid) {
             file_content, &file_content_array_size, " ", 52);
 
         current_process->command = file_content_array[1];
+
+        free(file_content);
+        free(file_content_array);
       }
     }
   }
+
+  free(files);
+  free(pid_path);
 
   closedir(pid_dir);
 
@@ -174,15 +176,22 @@ float *calculate_cpu_usage(char **pid_list, int size) {
     cpu_usage_list[i] = cpu_usage;
   }
 
+  free(total_time_before);
+  free(total_clock_ticks_before);
+  free(total_time_after);
+  free(total_clock_ticks_after);
+
   return cpu_usage_list;
 }
 
 int get_clock_ticks_by_pid(char *pid) {
   char *pid_path = get_path_for_process(pid);
   char *file = get_file_content("/stat", pid_path);
+  free(pid_path);
   int size = 0;
 
   char **array = split_string_by_delimiter(file, &size, " ", 52);
+  free(file);
 
   int user_time = atoi(array[13]);
   int system_time = atoi(array[14]);
@@ -210,7 +219,11 @@ int get_total_clock_ticks() {
 
   char **file_separated_by_lines = separate_file_by_lines(file);
 
+  free(file);
+
   char *cpu_ticks = file_separated_by_lines[0];
+
+  free(file_separated_by_lines);
 
   int size = 0;
 

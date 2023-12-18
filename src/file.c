@@ -22,6 +22,8 @@ char *get_file_content(char *filename, char *dir_path) {
 
   FILE *exe_file = fopen(pid_stat_path, "r");
 
+  free(pid_stat_path);
+
   size_t bytes_read;
   int buffer_capacity = sizeof(char) * 16;
   char *buffer = calloc(buffer_capacity + 1, sizeof(char));
