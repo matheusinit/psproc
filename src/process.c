@@ -13,18 +13,20 @@ char **separate_file_by_lines(char *file);
 int get_clock_ticks_by_pid(char *pid);
 int get_total_clock_ticks();
 
-void iterate_processes(char **processes_id, int size, float *cpu_usage_list) {
+struct process **iterate_processes_and_get_cpu_usage(char **processes_id,
+                                                     int size,
+                                                     float *cpu_usage_list) {
+  struct process **list = malloc(sizeof(struct process *) * size);
+
   for (int index = 0; index < size; index++) {
     char *selected_pid = processes_id[index];
 
     struct process *current_process = get_process_by_pid(selected_pid);
     current_process->cpu_usage = cpu_usage_list[index];
-
-    printf("%s\t%s\t%.2f\t\t%s\n", current_process->pid, current_process->state,
-           current_process->cpu_usage, current_process->command);
-
-    free(current_process);
+    list[index] = current_process;
   }
+
+  return list;
 }
 
 struct process *get_process_by_pid(char *pid) {

@@ -19,8 +19,17 @@ int main() {
 
   printf("%s\t%s\t%s\t%s\n", "PID", "STATE", "CPU USAGE(%)", "COMMAND");
 
-  iterate_processes(processes_id, processes_id_size, cpu_usage_list);
+  struct process **processes = iterate_processes_and_get_cpu_usage(
+      processes_id, processes_id_size, cpu_usage_list);
 
+  for (int index = 0; index < processes_id_size; index++) {
+    struct process *current_process = processes[index];
+
+    printf("%s\t%s\t%.2f\t\t%s\n", current_process->pid, current_process->state,
+           current_process->cpu_usage, current_process->command);
+  }
+
+  free(processes);
   free(processes_id);
   closedir(proc_dir);
 
