@@ -18,5 +18,6 @@ float *calculate_cpu_usage(char **pid_list, int size);
 struct process **iterate_processes_and_get_cpu_usage(char **processes_id,
                                                      int size,
                                                      float *cpu_usage_list);
+void print_processes_info(struct process **processes, int size);
 
 #endif
