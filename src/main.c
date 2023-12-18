@@ -19,7 +19,7 @@ int main() {
 
   printf("%s\t%s\t%s\t%s\n", "PID", "STATE", "CPU USAGE(%)", "COMMAND");
 
-  struct process **processes = iterate_processes_and_get_cpu_usage(
+  struct process **processes = iterate_processes_and_get_process_info(
       processes_id, processes_id_size, cpu_usage_list);
 
   print_processes_info(processes, processes_id_size);

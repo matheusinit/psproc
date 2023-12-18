@@ -22,9 +22,9 @@ void print_processes_info(struct process **processes, int size) {
   }
 }
 
-struct process **iterate_processes_and_get_cpu_usage(char **processes_id,
-                                                     int size,
-                                                     float *cpu_usage_list) {
+struct process **iterate_processes_and_get_process_info(char **processes_id,
+                                                        int size,
+                                                        float *cpu_usage_list) {
   struct process **list = malloc(sizeof(struct process *) * size);
 
   for (int index = 0; index < size; index++) {
