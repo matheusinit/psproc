@@ -25,7 +25,7 @@ int main() {
     struct process *current_process = get_process_by_pid(selected_pid);
     current_process->cpu_usage = cpu_usage_list[index];
 
-    printf("%s\t%s\t%.2f\t%s\n", current_process->pid, current_process->state,
+    printf("%s\t%s\t%.2f\t\t%s\n", current_process->pid, current_process->state,
            current_process->cpu_usage, current_process->command);
 
     free(current_process);
