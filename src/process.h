@@ -9,6 +9,7 @@ struct process {
   char *command;
   char *pid_path;
   float cpu_usage;
+  float memory_usage;
 };
 
 struct process *get_process_by_pid(char *pid);
