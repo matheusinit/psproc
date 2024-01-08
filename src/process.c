@@ -19,7 +19,7 @@ void print_processes_info(struct process **processes, int size) {
 
     printf("%s\t%s\t%.2f\t\t%.0f kB\t\t\t%s\n", current_process->pid,
            current_process->state, current_process->cpu_usage,
-           current_process->memory_usage, current_process->command);
+           current_process->rss, current_process->command);
   }
 }
 
@@ -77,7 +77,7 @@ struct process *get_process_by_pid(char *pid) {
           file_content, &file_content_array_size, " ", 52);
       current_process->pid = file_content_array[0];
       current_process->state = file_content_array[2];
-      current_process->memory_usage = atoi(file_content_array[23]) * 4;
+      current_process->rss = atoi(file_content_array[23]) * 4;
       free(file_content_array);
       free(file_content);
     }
