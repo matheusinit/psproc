@@ -17,7 +17,7 @@ void print_processes_info(struct process **processes, int size) {
   for (int index = 0; index < size; index++) {
     struct process *current_process = processes[index];
 
-    printf("%s\t%s\t%.2f\t\t%.0f\t%s\n", current_process->pid,
+    printf("%s\t%s\t%.2f\t\t%.0f kB\t\t\t%s\n", current_process->pid,
            current_process->state, current_process->cpu_usage,
            current_process->memory_usage, current_process->command);
   }
