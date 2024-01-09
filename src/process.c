@@ -12,14 +12,16 @@
 char **separate_file_by_lines(char *file);
 int get_clock_ticks_by_pid(char *pid);
 int get_total_clock_ticks();
+float get_memory_usage_by_pid(float rss);
 
 void print_processes_info(struct process **processes, int size) {
   for (int index = 0; index < size; index++) {
     struct process *current_process = processes[index];
 
-    printf("%s\t%s\t%.2f\t\t%.0f kB\t\t\t%s\n", current_process->pid,
+    printf("%s\t%s\t%.2f\t\t%.2f\t\t%.0f kB\t\t\t%s\n", current_process->pid,
            current_process->state, current_process->cpu_usage,
-           current_process->rss, current_process->command);
+           current_process->memory_usage, current_process->rss,
+           current_process->command);
   }
 }
 
@@ -37,6 +39,36 @@ struct process **iterate_processes_and_get_process_info(char **processes_id,
   }
 
   return list;
+}
+
+int get_total_memory(DIR *proc_dir) {
+  struct dirent *files;
+
+  int total_memory = 0;
+
+  while ((files = readdir(proc_dir))) {
+    if (strcmp(files->d_name, ".") == 0) {
+      continue;
+    }
+
+    if (strcmp(files->d_name, "..") == 0) {
+      continue;
+    }
+
+    if (strcmp(files->d_name, "meminfo") == 0) {
+      char *file_content = get_file_content(files->d_name, "/proc");
+
+      int file_content_array_size = 0;
+      char **file_content_array = split_string_by_delimiter(
+          file_content, &file_content_array_size, " ", 128);
+
+      char *total_memory_string = file_content_array[1];
+
+      total_memory = atoi(total_memory_string);
+    }
+  }
+
+  return total_memory;
 }
 
 struct process *get_process_by_pid(char *pid) {
@@ -78,6 +110,8 @@ struct process *get_process_by_pid(char *pid) {
       current_process->pid = file_content_array[0];
       current_process->state = file_content_array[2];
       current_process->rss = atoi(file_content_array[23]) * 4;
+      float memory_usage = get_memory_usage_by_pid(current_process->rss);
+      current_process->memory_usage = memory_usage;
       free(file_content_array);
       free(file_content);
     }
@@ -112,6 +146,19 @@ struct process *get_process_by_pid(char *pid) {
   closedir(pid_dir);
 
   return current_process;
+}
+
+float get_memory_usage_by_pid(float rss) {
+
+  DIR *proc_dir = check_and_open_directory("/proc");
+
+  int total_memory = get_total_memory(proc_dir);
+
+  closedir(proc_dir);
+
+  float percentage = (rss * 100) / total_memory;
+
+  return percentage;
 }
 
 char **get_processes_ids(DIR *directory, int *array_size) {
