@@ -17,11 +17,13 @@ float get_memory_usage_by_pid(float rss);
 void print_processes_info(struct process **processes, int size) {
   for (int index = 0; index < size; index++) {
     struct process *current_process = processes[index];
+    int column_width = 8;
 
-    printf("%s\t%s\t%.2f\t\t%.2f\t\t%.0f kB\t\t\t%s\n", current_process->pid,
-           current_process->state, current_process->cpu_usage,
-           current_process->memory_usage, current_process->rss,
-           current_process->command);
+    printf("%-*s %-*s %-*.2f %-*.2f %-*.0f %-*s\n", column_width,
+           current_process->pid, column_width, current_process->state,
+           column_width * 2, current_process->cpu_usage, column_width * 2,
+           current_process->memory_usage, column_width, current_process->rss,
+           column_width, current_process->command);
   }
 }
 

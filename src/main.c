@@ -15,8 +15,10 @@ int main() {
 
   float *cpu_usage_list = calculate_cpu_usage(processes_id, processes_id_size);
 
-  printf("%s\t%s\t%s\t%s\t\t%s\t\t%s\n", "PID", "STATE", "CPU USAGE(%)",
-         "MEMORY USAGE(%)", "RSS (kB)", "COMMAND");
+  int column_width = 8;
+  printf("%-*s %-*s %-*s %-*s %-*s %-*s\n", column_width, "PID", column_width,
+         "STATE", column_width * 2, "CPU USAGE(%)", column_width * 2,
+         "MEMORY USAGE (%)", column_width, "RSS (kB)", column_width, "COMMAND");
 
   struct process **processes = iterate_processes_and_get_process_info(
       processes_id, processes_id_size, cpu_usage_list);
