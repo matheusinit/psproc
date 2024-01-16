@@ -110,7 +110,17 @@ struct process *get_process_by_pid(char *pid) {
       char **file_content_array = split_string_by_delimiter(
           file_content, &file_content_array_size, " ", 52);
       current_process->pid = file_content_array[0];
-      current_process->state = file_content_array[2];
+
+      int index = 2;
+      char* state = file_content_array[index];
+
+      while (strlen(state) != 1) {
+        index++;
+        state = file_content_array[index];
+      }
+
+      current_process->state = state;
+
       current_process->rss = atoi(file_content_array[23]) * 4;
       float memory_usage = get_memory_usage_by_pid(current_process->rss);
       current_process->memory_usage = memory_usage;
