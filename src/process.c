@@ -121,7 +121,14 @@ struct process *get_process_by_pid(char *pid) {
 
       current_process->state = state;
 
-      current_process->rss = atoi(file_content_array[23]) * 4;
+      char* command = file_content_array[1];
+      int rss_index = 23;
+
+      if (strstr(command, ":") != NULL) {
+        rss_index++;
+      }
+
+      current_process->rss = atoi(file_content_array[rss_index]) * 4;
       float memory_usage = get_memory_usage_by_pid(current_process->rss);
       current_process->memory_usage = memory_usage;
       free(file_content_array);
