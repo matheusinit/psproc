@@ -161,16 +161,9 @@ struct process *get_process_by_pid(char *pid) {
     }
   }
 
-  char *proc_folder = "/proc/";
-
   struct stat stat_buffer;
 
-  char *second_pid_path = malloc(strlen(proc_folder) + strlen(pid) + 1);
-  strcpy(second_pid_path, "");
-  strcat(second_pid_path, "/proc/");
-  strcat(second_pid_path, pid);
-
-  if (lstat(second_pid_path, &stat_buffer) == -1) {
+  if (lstat(pid_path, &stat_buffer) == -1) {
     perror("lstat");
     exit(EXIT_FAILURE);
   }
