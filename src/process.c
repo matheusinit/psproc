@@ -1,12 +1,12 @@
 #include "process.h"
-
 #include "file.h"
 #include "utils.h"
-#include <ctype.h>
-#include <dirent.h>
+
+#include <pwd.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/stat.h>
 #include <unistd.h>
 
 char **separate_file_by_lines(char *file);
@@ -19,9 +19,10 @@ void print_processes_info(struct process **processes, int size) {
     struct process *current_process = processes[index];
     int column_width = 8;
 
-    printf("%-*s %-*s %-*.2f %-*.2f %-*.0f %-*s\n", column_width,
-           current_process->pid, column_width, current_process->state,
-           column_width * 2, current_process->cpu_usage, column_width * 2,
+    printf("%-*s %-*s %-*s %-*.2f %-*.2f %-*.0f %-*s\n", column_width * 2,
+           current_process->user, column_width, current_process->pid,
+           column_width, current_process->state, column_width * 2,
+           current_process->cpu_usage, column_width * 2,
            current_process->memory_usage, column_width, current_process->rss,
            column_width, current_process->command);
   }
@@ -82,6 +83,7 @@ struct process *get_process_by_pid(char *pid) {
   current_process->pid = "NULL";
   current_process->command = "NULL";
   current_process->state = "NULL";
+  current_process->user = "NULL";
 
   char *pid_path = get_path_for_process(pid);
 
@@ -112,7 +114,7 @@ struct process *get_process_by_pid(char *pid) {
       current_process->pid = file_content_array[0];
 
       int index = 2;
-      char* state = file_content_array[index];
+      char *state = file_content_array[index];
 
       while (strlen(state) != 1) {
         index++;
@@ -121,7 +123,7 @@ struct process *get_process_by_pid(char *pid) {
 
       current_process->state = state;
 
-      char* command = file_content_array[1];
+      char *command = file_content_array[1];
       int rss_index = 23;
 
       if (strstr(command, ":") != NULL) {
@@ -157,6 +159,33 @@ struct process *get_process_by_pid(char *pid) {
         free(file_content_array);
       }
     }
+  }
+
+  char *proc_folder = "/proc/";
+
+  struct stat stat_buffer;
+
+  char *second_pid_path = malloc(strlen(proc_folder) + strlen(pid) + 1);
+  strcpy(second_pid_path, "");
+  strcat(second_pid_path, "/proc/");
+  strcat(second_pid_path, pid);
+
+  if (lstat(second_pid_path, &stat_buffer) == -1) {
+    perror("lstat");
+    exit(EXIT_FAILURE);
+  }
+
+  struct passwd *pwd = getpwuid(stat_buffer.st_uid);
+  char *user = malloc(sizeof(char) * 128);
+
+  if (pwd != NULL) {
+    strcpy(user, pwd->pw_name);
+  } else {
+    printf("error: user with uid %d not found\n", stat_buffer.st_uid);
+  }
+
+  if (pwd != NULL) {
+    current_process->user = user;
   }
 
   free(files);

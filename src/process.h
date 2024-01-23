@@ -11,6 +11,7 @@ struct process {
   float cpu_usage;
   float rss;
   float memory_usage;
+  char *user;
 };
 
 struct process *get_process_by_pid(char *pid);
