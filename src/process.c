@@ -13,6 +13,7 @@ char **separate_file_by_lines(char *file);
 int get_clock_ticks_by_pid(char *pid);
 int get_total_clock_ticks();
 float get_memory_usage_by_pid(float rss);
+char *get_process_owner_by_pid_path(char *pid_path);
 
 void print_processes_info(struct process **processes, int size) {
   for (int index = 0; index < size; index++) {
@@ -161,6 +162,18 @@ struct process *get_process_by_pid(char *pid) {
     }
   }
 
+  char *user = get_process_owner_by_pid_path(pid_path);
+  current_process->user = user;
+
+  free(files);
+  free(pid_path);
+
+  closedir(pid_dir);
+
+  return current_process;
+}
+
+char *get_process_owner_by_pid_path(char *pid_path) {
   struct stat stat_buffer;
 
   if (lstat(pid_path, &stat_buffer) == -1) {
@@ -177,16 +190,7 @@ struct process *get_process_by_pid(char *pid) {
     printf("error: user with uid %d not found\n", stat_buffer.st_uid);
   }
 
-  if (pwd != NULL) {
-    current_process->user = user;
-  }
-
-  free(files);
-  free(pid_path);
-
-  closedir(pid_dir);
-
-  return current_process;
+  return user;
 }
 
 float get_memory_usage_by_pid(float rss) {
