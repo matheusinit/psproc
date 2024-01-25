@@ -14,6 +14,9 @@ int get_clock_ticks_by_pid(char *pid);
 int get_total_clock_ticks();
 float get_memory_usage_by_pid(float rss);
 char *get_process_owner_by_pid_path(char *pid_path);
+char **get_files_array_by_pid_dir(DIR *pid_dir);
+char *get_stat_file_content_by_pid_path(char *pid_path, char **files_array);
+char *get_pid();
 
 void print_processes_info(struct process **processes, int size) {
   for (int index = 0; index < size; index++) {
@@ -96,71 +99,65 @@ struct process *get_process_by_pid(char *pid) {
 
   DIR *pid_dir = check_and_open_directory(current_process->pid_path);
 
-  while ((files = readdir(pid_dir))) {
-    if (strcmp(files->d_name, ".") == 0) {
-      continue;
-    }
+  char **files_array = get_files_array_by_pid_dir(pid_dir);
 
-    if (strcmp(files->d_name, "..") == 0) {
-      continue;
-    }
+  get_stat_file_content_by_pid_path(pid_path, files_array);
 
-    if (strcmp(files->d_name, "stat") == 0) {
-      char *file_content =
-          get_file_content(files->d_name, current_process->pid_path);
-
-      int file_content_array_size = 0;
-      char **file_content_array = split_string_by_delimiter(
-          file_content, &file_content_array_size, " ", 52);
-      current_process->pid = file_content_array[0];
-
-      int index = 2;
-      char *state = file_content_array[index];
-
-      while (strlen(state) != 1) {
-        index++;
-        state = file_content_array[index];
-      }
-
-      current_process->state = state;
-
-      char *command = file_content_array[1];
-      int rss_index = 23;
-
-      if (strstr(command, ":") != NULL) {
-        rss_index++;
-      }
-
-      current_process->rss = atoi(file_content_array[rss_index]) * 4;
-      float memory_usage = get_memory_usage_by_pid(current_process->rss);
-      current_process->memory_usage = memory_usage;
-      free(file_content_array);
-      free(file_content);
-    }
-
-    if (strcmp(files->d_name, "cmdline") == 0) {
-      char *file_content =
-          get_file_content(files->d_name, current_process->pid_path);
-
-      current_process->command = file_content;
-
-      if (strcmp(current_process->command, "") == 0) {
-
-        char *file_content =
-            get_file_content("stat", current_process->pid_path);
-
-        int file_content_array_size = 0;
-
-        char **file_content_array = split_string_by_delimiter(
-            file_content, &file_content_array_size, " ", 52);
-
-        current_process->command = file_content_array[1];
-
-        free(file_content);
-        free(file_content_array);
-      }
-    }
-  }
+  // if (strcmp(files->d_name, "stat") == 0) {
+  //   char *file_content =
+  //       get_file_content(files->d_name, current_process->pid_path);
+  //
+  //   int file_content_array_size = 0;
+  //   char **file_content_array = split_string_by_delimiter(
+  //       file_content, &file_content_array_size, " ", 52);
+  //   current_process->pid = file_content_array[0];
+  //
+  //   int index = 2;
+  //   char *state = file_content_array[index];
+  //
+  //   while (strlen(state) != 1) {
+  //     index++;
+  //     state = file_content_array[index];
+  //   }
+  //
+  //   current_process->state = state;
+  //
+  //   char *command = file_content_array[1];
+  //   int rss_index = 23;
+  //
+  //   if (strstr(command, ":") != NULL) {
+  //     rss_index++;
+  //   }
+  //
+  //   current_process->rss = atoi(file_content_array[rss_index]) * 4;
+  //   float memory_usage = get_memory_usage_by_pid(current_process->rss);
+  //   current_process->memory_usage = memory_usage;
+  //   free(file_content_array);
+  //   free(file_content);
+  // }
+  //
+  // if (strcmp(files->d_name, "cmdline") == 0) {
+  //   char *file_content =
+  //       get_file_content(files->d_name, current_process->pid_path);
+  //
+  //   current_process->command = file_content;
+  //
+  //   if (strcmp(current_process->command, "") == 0) {
+  //
+  //     char *file_content =
+  //         get_file_content("stat", current_process->pid_path);
+  //
+  //     int file_content_array_size = 0;
+  //
+  //     char **file_content_array = split_string_by_delimiter(
+  //         file_content, &file_content_array_size, " ", 52);
+  //
+  //     current_process->command = file_content_array[1];
+  //
+  //     free(file_content);
+  //     free(file_content_array);
+  //   }
+  // }
 
   char *user = get_process_owner_by_pid_path(pid_path);
   current_process->user = user;
@@ -171,6 +168,49 @@ struct process *get_process_by_pid(char *pid) {
   closedir(pid_dir);
 
   return current_process;
+}
+
+char *get_stat_file_content_by_pid_path(char *pid_path, char **files_array) {
+  char *stat = malloc(sizeof(char) * 52);
+  char *current_item = files_array[0];
+  int index = 0;
+
+  while (current_item != NULL) {
+    if (strcmp(current_item, "stat") == 0) {
+      stat = current_item;
+    }
+
+    index++;
+    current_item = files_array[index];
+  }
+
+  char *file_content = get_file_content(stat, pid_path);
+
+  int file_content_array_size = 0;
+  char **file_content_array = split_string_by_delimiter(
+      file_content, &file_content_array_size, " ", 52);
+}
+
+char **get_files_array_by_pid_dir(DIR *pid_dir) {
+  struct dirent *files;
+
+  char **files_array = malloc(sizeof(char *) * 52);
+  int last_item_index = 0;
+
+  while ((files = readdir(pid_dir))) {
+    if (strcmp(files->d_name, ".") == 0) {
+      continue;
+    }
+
+    if (strcmp(files->d_name, "..") == 0) {
+      continue;
+    }
+
+    files_array[last_item_index] = files->d_name;
+    last_item_index++;
+  }
+
+  return files_array;
 }
 
 char *get_process_owner_by_pid_path(char *pid_path) {
