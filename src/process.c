@@ -15,8 +15,10 @@ int get_total_clock_ticks();
 float get_memory_usage_by_pid(float rss);
 char *get_process_owner_by_pid_path(char *pid_path);
 char **get_files_array_by_pid_dir(DIR *pid_dir);
-char *get_stat_file_content_by_pid_path(char *pid_path, char **files_array);
-char *get_pid();
+char *get_pid(char **stat_file_content_array);
+char *get_state(char **stat_file_content_array);
+int get_rss(char **stat_file_content_array);
+char *get_command(char *pid_path);
 
 void print_processes_info(struct process **processes, int size) {
   for (int index = 0; index < size; index++) {
@@ -79,8 +81,6 @@ int get_total_memory(DIR *proc_dir) {
 }
 
 struct process *get_process_by_pid(char *pid) {
-  struct dirent *files;
-
   struct process *current_process = malloc(sizeof(struct process));
 
   current_process->pid_path = "NULL";
@@ -99,70 +99,23 @@ struct process *get_process_by_pid(char *pid) {
 
   DIR *pid_dir = check_and_open_directory(current_process->pid_path);
 
-  char **files_array = get_files_array_by_pid_dir(pid_dir);
+  char *stat_file_content = get_file_content("stat", pid_path);
 
-  get_stat_file_content_by_pid_path(pid_path, files_array);
+  int file_content_array_size = 0;
+  char **stat_file_content_array = split_string_by_delimiter(
+      stat_file_content, &file_content_array_size, " ", 52);
 
-  // if (strcmp(files->d_name, "stat") == 0) {
-  //   char *file_content =
-  //       get_file_content(files->d_name, current_process->pid_path);
-  //
-  //   int file_content_array_size = 0;
-  //   char **file_content_array = split_string_by_delimiter(
-  //       file_content, &file_content_array_size, " ", 52);
-  //   current_process->pid = file_content_array[0];
-  //
-  //   int index = 2;
-  //   char *state = file_content_array[index];
-  //
-  //   while (strlen(state) != 1) {
-  //     index++;
-  //     state = file_content_array[index];
-  //   }
-  //
-  //   current_process->state = state;
-  //
-  //   char *command = file_content_array[1];
-  //   int rss_index = 23;
-  //
-  //   if (strstr(command, ":") != NULL) {
-  //     rss_index++;
-  //   }
-  //
-  //   current_process->rss = atoi(file_content_array[rss_index]) * 4;
-  //   float memory_usage = get_memory_usage_by_pid(current_process->rss);
-  //   current_process->memory_usage = memory_usage;
-  //   free(file_content_array);
-  //   free(file_content);
-  // }
-  //
-  // if (strcmp(files->d_name, "cmdline") == 0) {
-  //   char *file_content =
-  //       get_file_content(files->d_name, current_process->pid_path);
-  //
-  //   current_process->command = file_content;
-  //
-  //   if (strcmp(current_process->command, "") == 0) {
-  //
-  //     char *file_content =
-  //         get_file_content("stat", current_process->pid_path);
-  //
-  //     int file_content_array_size = 0;
-  //
-  //     char **file_content_array = split_string_by_delimiter(
-  //         file_content, &file_content_array_size, " ", 52);
-  //
-  //     current_process->command = file_content_array[1];
-  //
-  //     free(file_content);
-  //     free(file_content_array);
-  //   }
-  // }
+  char *pid_from_stat = get_pid(stat_file_content_array);
+
+  current_process->pid = pid_from_stat;
+  current_process->state = get_state(stat_file_content_array);
+  current_process->rss = get_rss(stat_file_content_array);
+  current_process->memory_usage = get_memory_usage_by_pid(current_process->rss);
+  current_process->command = get_command(pid_path);
 
   char *user = get_process_owner_by_pid_path(pid_path);
   current_process->user = user;
 
-  free(files);
   free(pid_path);
 
   closedir(pid_dir);
@@ -170,31 +123,45 @@ struct process *get_process_by_pid(char *pid) {
   return current_process;
 }
 
-char *get_stat_file_content_by_pid_path(char *pid_path, char **files_array) {
-  char *stat = malloc(sizeof(char) * 52);
-  char *current_item = files_array[0];
-  int index = 0;
+char *get_pid(char **stat_file_content_array) {
+  return stat_file_content_array[0];
+}
 
-  while (current_item != NULL) {
-    if (strcmp(current_item, "stat") == 0) {
-      stat = current_item;
-    }
+char *get_state(char **stat_file_content_array) {
+  return stat_file_content_array[2];
+}
 
-    index++;
-    current_item = files_array[index];
+int get_rss(char **stat_file_content_array) {
+  int rss_index = 23;
+  return atoi(stat_file_content_array[rss_index]) * 4;
+}
+
+char *get_command(char *pid_path) {
+  char *command = get_file_content("cmdline", pid_path);
+
+  if (strcmp(command, "") == 0) {
+    char *file_content = get_file_content("stat", pid_path);
+
+    int file_content_array_size = 0;
+
+    char **file_content_array = split_string_by_delimiter(
+        file_content, &file_content_array_size, " ", 52);
+
+    char *process_name = file_content_array[1];
+
+    free(file_content);
+    free(file_content_array);
+
+    return process_name;
   }
 
-  char *file_content = get_file_content(stat, pid_path);
-
-  int file_content_array_size = 0;
-  char **file_content_array = split_string_by_delimiter(
-      file_content, &file_content_array_size, " ", 52);
+  return command;
 }
 
 char **get_files_array_by_pid_dir(DIR *pid_dir) {
   struct dirent *files;
 
-  char **files_array = malloc(sizeof(char *) * 52);
+  char **files_array = malloc(sizeof(char *) * 512);
   int last_item_index = 0;
 
   while ((files = readdir(pid_dir))) {
@@ -222,7 +189,7 @@ char *get_process_owner_by_pid_path(char *pid_path) {
   }
 
   struct passwd *pwd = getpwuid(stat_buffer.st_uid);
-  char *user = malloc(sizeof(char) * 128);
+  char *user = malloc(sizeof(char) * 52);
 
   if (pwd != NULL) {
     strcpy(user, pwd->pw_name);
